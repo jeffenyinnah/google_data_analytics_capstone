@@ -1,0 +1,413 @@
+---
+title: 'Case Study: How Does a Bike-Share Navigate Speedy Success?'
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+  html_notebook: default
+---
+# Introduction
+### Google Data Analyst Certificate Capstone Project
+For the final stage of completing my Google Data Analytics Professional Certificate capstone project, i have selected the Cyclistic Bikeshare Case Study. I will perform real world tasks of a Junior data analyst for the Marketing team at Clyclistic using the 6 steps of Data Analysis; Ask, Prepare, Process, Analyze, Share and Act.
+
+![Cyclistic: Bikeshare](/Users/elian/Desktop/Career Change 1 month Challenge/Data Analysis/Google Data Analytics Capstone Project/bikeshare.png)
+
+## Background
+The director of marketing, Lily Moreno believes the company’s future success depends on maximizing the number of annual memberships.
+
+Moreno has set a clear goal: Design marketing strategies aimed at converting casual riders into annual members. In order to do that, however, the marketing analyst team needs to better understand how annual members and casual riders differ, why casual riders would buy a membership, and how digital media could affect their marketing tactics. 
+
+Moreno and her team are interested in analyzing the Cyclistic historical bike trip data to identify trends.
+
+### Characters and teams
+
+**Cyclistic:** A bike-share program that features more than 5,800 bicycles and 600 docking stations. In 2016, Cyclistic launched a successful bike-share offering. Since then, the program has grown to a fleet of 5,824 bicycles that
+are geotracked and locked into a network of 692 stations across Chicago. The bikes can be unlocked from one station and returned to any other station in the system anytime.
+
+**Lily Moreno::** The director of marketing and is responsible for the development of campaigns and initiatives to promote the bike-share program.
+
+**Cyclistic marketing analytics team:** A team of data analysts who are responsible for collecting, analyzing, and reporting data that helps guide Cyclistic marketing strategy. And yours faithfully, working as a Junior Data Analyst.
+
+**Cyclistic executive team:** Stakeholders
+
+## Ask Phase
+### Business Task
+Analyze the Cyclistic historical bike trip data to identify trends and insights from the analysis, and use identified trends and insights to Design marketing strategies aimed at converting casual riders into annual members.
+
+### Key Stakeholders
+- Lily Moreno - The director of marketing
+- The Executive Team
+
+### Questions to Analyze
+#### Three questions will guide the future marketing program:
+- **How do annual members and casual riders use Cyclistic bikes differently?** *Assigned to me to analyze by The director of Marketing*
+- Why would casual riders buy Cyclistic annual memberships?
+- How can Cyclistic use digital media to influence casual riders to become members?
+
+## Prepare Phase
+### Data Source
+The Data for this Analysis was obtained from [Cyclistic Trip data](https://divvy-tripdata.s3.amazonaws.com/index.html). It includes the previous 12 months of Cyclistic trip data containing information such as start datetime, end datetime, and member type. This data has been made available by Motivate International Inc. under this [license.](https://ride.divvybikes.com/data-license-agreement) 
+For this analysis, i have downloaded dataset for the months of January to December 2021. 12 months worth of data extracted to 12 csv files.
+
+### Data Organization
+- File Type: Extracted to a CSV file format
+- File Naming Convention: cyclistic_trip_data_YYYY_MM
+
+### Data Security
+Riders’ personally identifiable information is hidden(Prohibited to be used)
+
+## Process Phase
+### Tools
+For this Analysis, i have decided to use R Programming Language to conduct this analysis because it has the ability to quickly and efficiently process large datasets. The datasets comprised of the previous 12 months of Cyclistic trip data are all in csv formats.
+- R programming Language
+- Rstudio
+
+After creating a R file and adding the csv files to the working directory, i installed and loaded packages for data manipulation, then i imported all the csv files and combined them as follows;
+### Installing and Loading packages
+I started by installing the packages i needed for this Cleaning process. Which are as follows;
+- tidyverse: (to manipulate data)
+- lubridate: (to manipulate dates)
+
+
+*install.packages("tidyverse")*
+*install.packages("lubridate")*
+
+```{r}
+# loading the libraries
+library(tidyverse)
+library(lubridate)
+```
+
+### importing all the individual csv files into rstudio for merging
+```{r}
+df1 <- read_csv("data/cyclistic_trip_data_2021_01.csv")
+df2 <- read_csv("data/cyclistic_trip_data_2021_02.csv")
+df3 <- read_csv("data/cyclistic_trip_data_2021_03.csv")
+df4 <- read_csv("data/cyclistic_trip_data_2021_04.csv")
+df5 <- read_csv("data/cyclistic_trip_data_2021_05.csv")
+df6 <- read_csv("data/cyclistic_trip_data_2021_06.csv")
+df7 <- read_csv("data/cyclistic_trip_data_2021_07.csv")
+df8 <- read_csv("data/cyclistic_trip_data_2021_08.csv")
+df9 <- read_csv("data/cyclistic_trip_data_2021_09.csv")
+df10 <- read_csv("data/cyclistic_trip_data_2021_10.csv")
+df11 <- read_csv("data/cyclistic_trip_data_2021_11.csv")
+df12 <- read_csv("data/cyclistic_trip_data_2021_12.csv")
+```
+
+Merging all individual files together using **"rbind()"** After merging, df_all contained the combined csv files and now has 5,479,096 rows.
+```{r}
+#merging together all the individual csv files
+df_all <- rbind(df12, df11, df1, df2, df3, df4, df5, df6, df7, df8, df9, df10)
+head(df_all)
+```
+Saving the merged dataframe to local storage for backup using **"write_csv()"**
+```{r}
+write_csv(df_all, "data/merged_trip.csv")
+```
+
+### Inspecting the new combined dataframe
+```{r}
+str(df_all) #To see the structure
+summary(df_all) #to produce a summary of all records in the found set
+```
+
+```{r}
+sum(is.na(df_all)) # to check the number of missing values. 
+```
+
+### Transforming data
+To answer the questions asked, we need to add more colunms to help us calculate the length of rides "ride_length" and "day_of_week" to calculate the day of week that each ride started.
+To carry this out, i use mutate() to add the new columns and use "wday()" to get the day of the week and save them into a new dataframe "transformed_df"
+```{r}
+transformed_df <- df_all %>% 
+  mutate(ride_length = as.numeric(ended_at - started_at)) %>% 
+  mutate(day_of_week = wday(started_at, label = TRUE, abbr = FALSE, week_start = 1, 
+                            locale = Sys.setlocale("LC_ALL", locale = "C"))) %>% 
+  mutate(date = as.Date(started_at)) %>% 
+  mutate(month = format(as.Date(date), "%m"))
+head(transformed_df)
+```
+
+```{r}
+head(transformed_df)
+```
+
+### Cleaning data
+First, lets check if our dataframe contains duplicates. To do this, tidyverse has a function to do this called "duplicated()". I will use this function to check for duplicates and count total duplicates. Also earlier, our transformed_df had 2,710,181 missing values. This was done using  the sum(is.na()) to check for missing values
+
+```{r}
+
+duplicated(transformed_df)
+sum(duplicated(transformed_df))
+
+```
+After running "sum(duplicated(transformed_df))", it shows there are no duplicates but with the sum(is.na()) we did earlier shows lots of missing values. 
+
+### Filtering out data to remove rows that might affect our analysis such as 
+- ride_length equal or less than zero (0), 
+- trips not starting or ending at a station,
+- checking the data types of the columns to be sure before calculations
+
+```{r}
+filtered_df <-transformed_df %>% 
+  filter(ride_length > 0)%>%
+  filter(!is.na(start_station_name)) %>% 
+  filter(!is.na(end_station_name)) %>% 
+  filter(!is.na(ride_length))
+View(filtered_df)
+```
+![Filtered/cleaned dataset](/Users/elian/Desktop/Career Change 1 month Challenge/Data Analysis/Google Data Analytics Capstone Project/cleaned_data.png)
+
+### checking the data types of the columns to be sure before calculations
+```{r}
+colnames(filtered_df)
+str(filtered_df)
+```
+![cleaned dataset structure](/Users/elian/Desktop/Career Change 1 month Challenge/Data Analysis/Google Data Analytics Capstone Project/str_filtered.png)
+
+After cleaning the data, it is now ready to enter the analysis phase. The total row count after the cleaning has reduced to 4,525,274. I stored the cleaned data into the **filtered_df** dataframe.
+
+## Analyze Phase
+In this phase, to get insights from this dataset i will,  
+-look at the length of each rides, type of bike, membership type, start and end station for trends. 
+-extract the month and day of each ride and store them in different columns.
+- Conduct descriptive analysis on length of each ride
+- calculate average rides for members and casual riders
+- calculate average length of rides by users by day of week
+- calculate number of rides by users by day of week 
+
+### extract the month and day of each ride and store them in different columns.
+```{r}
+filtered_df$day <- format(as.Date(filtered_df$date), "%d") #extracted day of each ride from date
+filtered_df$month <- format(as.Date(filtered_df$date), "%m") #month of each rides
+head(select(filtered_df, day, month, day_of_week))
+```
+
+
+### Conduct descriptive analysis on length of each ride
+```{r}
+summary(filtered_df$ride_length)
+```
+
+### calculate average rides for members and casual riders
+```{r}
+avg_rides_members_casual <- filtered_df %>%
+  group_by(member_casual) %>%
+  summarise(avg_rides = mean(ride_length)) %>% 
+  arrange(desc(avg_rides))
+head(avg_rides_members_casual)
+```
+
+### comparing members and casual users ride length
+```{r}
+#Average Score(mins)
+aggregate(filtered_df$ride_length ~ filtered_df$member_casual, FUN = mean)
+```
+
+```{r}
+#median Score (mins)
+aggregate(filtered_df$ride_length ~ filtered_df$member_casual, FUN = median)
+```
+
+```{r}
+#Max Score(mins)
+aggregate(filtered_df$ride_length ~ filtered_df$member_casual, FUN = max)
+```
+
+```{r}
+#Min Score (min)
+aggregate(filtered_df$ride_length ~ filtered_df$member_casual, FUN = min)
+```
+
+### calculate average length of rides by users by day of week
+```{r}
+avg_rides_length <- filtered_df %>% 
+  group_by(member_casual, day_of_week, month, date) %>% 
+  summarise(avg_rides = mean(ride_length)) %>% 
+  arrange(desc(avg_rides))
+head(avg_rides_length)
+```
+![Average length of rides](/Users/elian/Desktop/Career Change 1 month Challenge/Data Analysis/Google Data Analytics Capstone Project/avg_rides_length.png)
+
+### calculate number of rides by users by day of week
+```{r}
+num_of_rides <- filtered_df %>%
+  group_by(member_casual,day_of_week) %>% 
+  summarise(number_of_rides = n())
+View(num_of_rides)
+```
+![Average length of rides](/Users/elian/Desktop/Career Change 1 month Challenge/Data Analysis/Google Data Analytics Capstone Project/num_of_rides.png)
+
+## Share Phase
+### Summary of all the Analysis. Data Visualization using gglot2. 
+#### Lets look at the day of the week Customers use bikeshare more
+```{r}
+filtered_df %>%
+  mutate(day_of_week = wday(started_at, label = TRUE, week_start = 1, 
+                            locale = Sys.setlocale("LC_ALL", locale = "C"))) %>% 
+  group_by(member_casual, day_of_week) %>% 
+  summarise(num_of_rides = n()) %>% 
+  arrange(member_casual, day_of_week) %>% 
+  ggplot(aes(x = day_of_week, y = num_of_rides, fill = member_casual)) +
+  geom_col(position = "dodge") +
+  labs(x = "Day of the week", y = "Number of rides",
+       title = "Number of Rides by Day of the week")+
+  scale_y_continuous(name=expression(num ~ of ~ rides ~ (x10^5)),
+                     labels=function(x) x / 100000,
+                     limits=c(0,1000000))
+```
+
+![Number of Rides by day of Week](/Users/elian/Desktop/Career Change 1 month Challenge/Data Analysis/Google Data Analytics Capstone Project/Number of Rides by Day of the week.png)
+
+The above graph shows that Casual Customers are relatively low on Workdays but ride more on weekends, whereas number of rides for member Customers during workdays are steady with peaks on Tuesday and Wednesday.
+
+#### Lets look at the Months Customers use bikeshare more
+```{r}
+filtered_df %>%
+  mutate(month = month(date, label = TRUE, abbr = TRUE)) %>% 
+  group_by(member_casual, month) %>% 
+  summarise(num_of_rides = n()) %>% 
+  arrange(member_casual, month) %>% 
+  ggplot(aes(x = month, y = num_of_rides, fill = member_casual)) +
+  geom_col(position = "dodge") +
+  labs(x = "Months", y = "Number of rides",
+       title = "Number of Rides by Months")+
+  scale_y_continuous(name=expression(num ~ of ~ rides ~ (x10^5)),
+                     labels=function(x) x / 100000,
+                     limits=c(0,700000))
+```
+
+![Number of Rides by months](/Users/elian/Desktop/Career Change 1 month Challenge/Data Analysis/Google Data Analytics Capstone Project/number of rides by months.png)
+
+The above graph shows that the number of rides by both customer types were increasing as the weather got warmer and the member customer slowly decreased more than Casual Customers during Colder weather. 
+
+To determine how long customers used bike share, we had to aggregate Ride duration by bike Type, Day of Week and Months. 
+
+### Firstly, lets visualize the length of duration by Bike Type(Classic Bikes, Docked and electric) and length of duration by Bike Type(Members Vs. Casual Customers)
+```{r}
+filtered_df %>% 
+  group_by(rideable_type) %>% 
+  summarise(avg_rides = mean(ride_length)) %>%
+  ggplot(aes(x = rideable_type, y = avg_rides, fill = rideable_type)) +
+  geom_col(position = "dodge") +
+  labs(x = "Bike Types", y = "Average Rides Duration",
+       title = "Average Ride durations of Bike Type ")
+```
+![Average Ride Duration by Bike Types](/Users/elian/Desktop/Career Change 1 month Challenge/Data Analysis/Google Data Analytics Capstone Project/Average Ride durations of Bike Type.png)
+```{r}
+filtered_df %>% 
+  group_by(member_casual, rideable_type) %>% 
+  summarise(avg_rides = mean(ride_length)) %>%
+  ggplot(aes(x = rideable_type, y = avg_rides, fill = member_casual)) +
+  geom_col(position = "dodge") +
+  labs(x = "Bike Types", y = "Average Rides Duration(mins)",
+       title = "Average Ride durations of Bike Types(members vs casual)")
+```
+![Average Ride Duration by Bike Types](/Users/elian/Desktop/Career Change 1 month Challenge/Data Analysis/Google Data Analytics Capstone Project/Average Ride durations of Bike Types mc.png)
+
+
+From the above graphs, Docked Bikes are the most used Bikes followed by Classic Bikes and then Electric Bike. Also, there is a high popularity of Docked Bikes by Casual Customers followed by Classic Bikes and Electric being the least popular.
+
+
+### Visualizing Average ride duration by day of week (bike type)
+```{r}
+filtered_df %>%
+  mutate(day_of_week = wday(started_at, label = TRUE, week_start = 1, 
+                            locale = Sys.setlocale("LC_ALL", locale = "C"))) %>%
+  group_by(member_casual, day_of_week, rideable_type) %>% 
+  summarise(avg_rides = mean(ride_length)) %>%
+  arrange(member_casual, day_of_week) %>% 
+  ggplot(aes(x= day_of_week, y = avg_rides, fill=member_casual)) +
+  geom_col(position = "dodge") +
+  facet_wrap(~ rideable_type) +
+  labs(x = "Day of the week", y = "Average Rides Duration(mins)", 
+       title = "Average ride duration by day of week(bike types)", fill="Customer type")
+```
+![Average Rides duration by day of week](/Users/elian/Desktop/Career Change 1 month Challenge/Data Analysis/Google Data Analytics Capstone Project/Average ride duration by day of week.png)
+From the above grah, we can see that Docked Bikes are very Popular with Casual Customers everyday of the week compared to other Bikes namely Classic and Electric. Member Customers are quite steady throughout the week.
+
+
+#### Visualizing the duration of rides by Users by Day of Week. To get this, we aggregate Ride Durations.
+```{r}
+filtered_df %>%
+  mutate(day_of_week = wday(started_at, label = TRUE, week_start = 1, 
+                            locale = Sys.setlocale("LC_ALL", locale = "C"))) %>%
+  group_by(member_casual, day_of_week) %>% 
+  summarise(avg_rides = mean(ride_length)) %>%
+  ggplot(aes(x = day_of_week, y = avg_rides, fill = member_casual)) +
+  geom_col(position = "dodge") +
+  labs(x = "Day of the week", y = "Average Rides Duration",
+       title = "Average Rides by Day of Week")
+```
+
+![Average Rides by day of week](/Users/elian/Desktop/Career Change 1 month Challenge/Data Analysis/Google Data Analytics Capstone Project/Average Rides by Day of Week.png)
+
+The graph above shows that for casual customers most popular days for riding are weekends, whereas Average rides for member Customers ride bikes during working days is steady, and increases on weekends.
+
+
+#### Visualizing the duration of rides by Users by Months. To get this, we aggregate Ride Durations.
+```{r}
+filtered_df %>% 
+  mutate(month = month(date, label = TRUE, abbr = TRUE)) %>%
+  group_by(member_casual, month) %>% 
+  summarise(avg_rides = mean(ride_length)) %>%
+  ggplot(aes(x = month, y = avg_rides, fill = member_casual)) +
+  geom_col(position = "dodge") +
+  labs(x = "Months", y = "Average Rides Duration",
+       title = "Average Rides by Months ")
+```
+
+![Average Rides by months](/Users/elian/Desktop/Career Change 1 month Challenge/Data Analysis/Google Data Analytics Capstone Project/Average Rides by Months.png)
+
+The above graph shows that Casual riders are using bike almost twice as longer as members throughout the year.The Average Duration of Members rides is almost steady throughout the year
+
+
+#### Visualizing average ride duration of users from January 2021 to December 2021 (Trend)
+```{r}
+filtered_df %>%
+  mutate(month = month(date, label = TRUE, abbr = TRUE, 
+                       locale = Sys.setlocale("LC_ALL", locale = "C"))) %>%
+  group_by(member_casual, month) %>% 
+  summarise(avg_rides = mean(ride_length)) %>%
+  ggplot(aes(x = month, y = avg_rides, group = member_casual)) +
+  geom_line(aes(color=member_casual)) + geom_point(aes(color=member_casual)) +
+  labs(x = "Months", y = "Average Rides Duration(mins)",
+       title = "Average Rides Duration(mins) trends(Member vs Casual)")
+```
+![Average Rides by months](/Users/elian/Desktop/Career Change 1 month Challenge/Data Analysis/Google Data Analytics Capstone Project/Average Rides Duration trend.png)
+
+
+#### Visualizing average ride duration using Bike types from January 2021 to December 2021(Trend)
+```{r}
+filtered_df %>%
+  mutate(month = month(date, label = TRUE, abbr = TRUE, 
+                       locale = Sys.setlocale("LC_ALL", locale = "C"))) %>%
+  group_by(rideable_type, month) %>% 
+  summarise(avg_rides = mean(ride_length)) %>%
+  ggplot(aes(x = month, y = avg_rides, group = rideable_type)) +
+  geom_line(aes(color=rideable_type)) + geom_point(aes(color=rideable_type)) +
+  labs(x = "Months(Year 2021)", y = "Average Rides Duration(mins)",
+       title = "Average Rides Duration(mins) trend(by Bike Types)")
+```
+![Average Rides by months](/Users/elian/Desktop/Career Change 1 month Challenge/Data Analysis/Google Data Analytics Capstone Project/Average Rides Duration trend2.png)
+
+
+
+
+## Conclusions
+### Insights Derived
+1. Casual Riders take longer rides than Annual Riders
+2. Casual Riders enjoy taking rides on **Weekends** and less rides on workdays. While annual riders have 
+  more steady number of rides on workdays and little increases on weekend.
+3. Both Casual and Annual Riders average number of rides increases as the Chicago weather gets warmer and decreases when its cold.
+4. Casual Riders prefer Docked Bikes, followed by Classic and Electric being the least popular
+5. Annual Riders prefer Classic bikes, with Docked and Electric bikes relatively close in average number.
+6. Casual Riders have a high Activity in Warmer Chicago Weather.
+
+### Recommendations
+
+Casual Riders have a high activity in warmer Weathers - Spring and Autumn. Causal riders have longer ride trips(Duration wise) on weekends and less on workdays.
+Annual Riders have a longer ride trips(Duration wise) on workdays and less on weekends.
+I believe this makes it very possible to for Cyclistic Bike Share distribute bikes evenly for the customer types.
+
+From the insights i derived from this analysis, i would recommend to the director of marketing and your manager of Cyclistic Bike Share, Lily Moreno, to design a marketing campaign with a purpose of converting Casual Riders into Annual Riders with Subscriptions. And Maybe, add a marketing campaign to increase trips with Classic and Electric Bikes. 
