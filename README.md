@@ -1,5 +1,7 @@
 # Google Data Analytics Capstone
 
+![Cyclistic Bike share](https://miro.medium.com/max/434/1*1tTsPEI7QGyzotNc8swIAQ.png)
+
 ## Google Data Analyst Certificate Capstone Project Analysis
 
 This notebook is part of capstone project to be completed for Google Data Analytics Professional Certificate. In the final course of the Coursera program I was given a task to analyze a case with fictional bicycle renting company Cyclistic. The marketing team aims to converting casual customers to annual subscriber. I had to analyze rides data collected through last 12 month in order to find differences between casual riders and annual subscribers.
